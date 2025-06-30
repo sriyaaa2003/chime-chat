@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify Account</title>
+    <link rel="stylesheet" href="auth.css">
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@5.2.10/dist/amazon-cognito-identity.min.js"></script>
+</head>
+<body>
+    <h2>Verify Account</h2>
+    <form id="verifyForm">
+        <input type="text" id="verificationCode" placeholder="Enter verification code" required>
+        <button type="submit">Verify</button>
+    </form>
+
+    <script>
+        // Get username from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        
+        // Configure Cognito
+        const poolData = {
+            UserPoolId: 'your-user-pool-id',
+            ClientId: 'your-app-client-id'
+        };
+        const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        
+        const userData = {
+            Username: username,
+            Pool: userPool
+        };
+        const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+        
+        document.getElementById('verifyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const verificationCode = document.getElementById('verificationCode').value;
+            
+            cognitoUser.confirmRegistration(verificationCode, true, function(err, result) {
+                if (err) {
+                    alert(err.message || JSON.stringify(err));
+                    return;
+                }
+                alert('Verification successful! You can now sign in.');
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</body>
+</html>
